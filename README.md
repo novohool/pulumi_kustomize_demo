@@ -12,3 +12,7 @@
 - vault作为配置中心，需部署vault
 - 修改run.sh中的VAULT
 
+
+#### 其他
+- pulumi V2 api估计是为了对标苹果的pkl，有些情况只支持一种数据类型，但yaml支持两种类型，它会自动转换掉，所以这里没有使用v2版本api
+- 苹果的pkl地址: https://github.com/apple/pkl-k8s-examples
