@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ app_name }}
+  namespace: {{ app_namespace }}
+  {%- if labels %}
+  labels:
+    {%- for key, value in labels.items() %}
+    {{ key }}: {{ value }}
+    {%- endfor %}
+  {%- endif %}
+spec:
+  replicas: {{ replicas }}
+  selector:
+    {%- if labels %}
+    matchLabels:
+      {%- for key, value in labels.items() %}
+      {{ key }}: {{ value }}
+      {%- endfor %}
+    {%- endif %}
+  template:
+    metadata:
+      {%- if labels %}
+      labels:
+        {%- for key, value in labels.items() %}
+        {{ key }}: {{ value }}
+        {%- endfor %}
+      {%- endif %}
+    spec:
+      {%- if node_selector %}
+      nodeSelector:
+        {%- for key, value in node_selector.items() %}
+        {{ key }}: {{ value }}
+        {%- endfor %}
+      {%- endif %}
+      initContainers:
+      {%- for container in init_containers %}
+      - name: {{ container.name }}
+        image: {{ container.image }}
+        command: {{ container.command }}
+      {%- endfor %}
+      containers:
+      - name: {{ app_name }}
+        image: {{ image }}
+        command: {{ commands }}
+        ports:
+        {%- for port in ports %}
+        - name: {{ port.name }}
+          containerPort: {{ port.containerPort }}
+          protocol: {{ port.protocol }}
+        {%- endfor %}
+        readinessProbe:
+          httpGet:
+            path: {{ readiness_probe.httpGet.path }}
+            port: {{ readiness_probe.httpGet.port }}
+          initialDelaySeconds: {{ readiness_probe.initialDelaySeconds }}
+          periodSeconds: {{ readiness_probe.periodSeconds }}
+        resources:
+          limits:
+            cpu: {{ resources.limits.cpu }}
+            memory: {{ resources.limits.memory }}
+          requests:
+            cpu: {{ resources.requests.cpu }}
+            memory: {{ resources.requests.memory }}
